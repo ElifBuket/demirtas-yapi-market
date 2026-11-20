@@ -1,0 +1,11 @@
+{
+  "expo": {
+    "name": "Demirtaş Satış",
+    "slug": "demirtas-satis",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "android": { "package": "com.voqa.demirtas.satis", "versionCode": 1, "usesCleartextTraffic": true },
+    "plugins": []
+  }
+}
