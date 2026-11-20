@@ -1,6 +1,6 @@
 # Veri Aktarım Raporu
 
-Çalışma zamanı: 2026-11-20 12:46:47
+Çalışma zamanı: 2026-11-20 19:32:24
 
 ## Cariler
 

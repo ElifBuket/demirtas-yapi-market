@@ -17,8 +17,14 @@ async function istek(sunucu, yontem, yol, govde, jeton) {
   } catch (e) {
     throw new ApiHatasi('Sunucuya ulaşılamadı.', 0); // ağ yok / zaman aşımı
   } finally { clearTimeout(zamanAsimi); }
-  let j = {};
-  try { j = await y.json(); } catch (e) { /* JSON olmayabilir */ }
+  const metin = await y.text();
+  let j = null;
+  try { j = JSON.parse(metin); } catch (e) { /* JSON değil */ }
+  if (j === null || typeof j !== 'object') {
+    // Hosting bot koruması / hata sayfası gibi JSON olmayan yanıt: sessizce geçme, nedenini göster.
+    const ozet = metin.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 80);
+    throw new ApiHatasi(`Sunucu beklenmeyen yanıt verdi (HTTP ${y.status}). ${ozet}`, y.status || 0);
+  }
   if (!y.ok) throw new ApiHatasi(j.hata || `Sunucu hatası (${y.status}).`, y.status);
   return j;
 }

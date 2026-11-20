@@ -23,6 +23,7 @@ function Giris({ onGiris }) {
     setMesgul(true); setHata('');
     try {
       const y = await Api.giris(sunucu.trim(), ka.trim(), pw);
+      if (!y.token || !y.kullanici) throw new Error('Sunucu geçerli bir giriş yanıtı vermedi.');
       await onGiris({ sunucu: sunucu.trim(), token: y.token, kullanici: y.kullanici });
     } catch (e) { setHata(e.message); } finally { setMesgul(false); }
   }
