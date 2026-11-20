@@ -1,0 +1,22 @@
+# Apache (XAMPP / VPS / paylaşımlı hosting): var olmayan her adres index.php'ye gider.
+Options -Indexes
+RewriteEngine On
+
+# Mobil API için Authorization başlığı bazı PHP kurulumlarında (CGI/FPM) düşer; geri ekle.
+RewriteCond %{HTTP:Authorization} .
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+# Canlıda HTTP → HTTPS (localhost ve IP'ler hariç)
+RewriteCond %{HTTPS} off
+RewriteCond %{HTTP:X-Forwarded-Proto} !https
+RewriteCond %{HTTP_HOST} !^(localhost|127\.0\.0\.1|192\.168\.|10\.)
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.php [L]
+
+# Gizli dosyalar
+<FilesMatch "^\.(env|git)">
+  Require all denied
+</FilesMatch>
