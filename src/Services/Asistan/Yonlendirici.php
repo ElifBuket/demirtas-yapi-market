@@ -17,6 +17,18 @@ final class Yonlendirici
             return Asistan::yanit('Ben yalnızca veri okuyabilen bir asistanım; kayıt ekleyemem, değiştiremem, silemem. Bu işlemi ilgili ekrandan (sipariş, tahsilat, stok, cari) yetkili kullanıcıyla yapabilirsiniz.', null, 'kural', []);
         }
         if (preg_match('/\b(S-\d{4}-\d{6})\b/i', $soru, $m)) return self::araclaSor('siparis_sorgula', ['sorgu' => strtoupper($m[1])], $kul);
+        if (preg_match('/(borc|bakiye)/', $n) && preg_match('/musteri|cari/', $n) && preg_match('/en (cok|fazla|yuksek)|ilk \d+|lider/', $n)) {
+            $say = ['bir' => 1, 'iki' => 2, 'uc' => 3, 'dort' => 4, 'bes' => 5, 'alti' => 6, 'yedi' => 7, 'sekiz' => 8, 'dokuz' => 9, 'on' => 10];
+            $adet = 5;
+            if (preg_match('/\b(\d{1,2})\b/', $n, $m)) $adet = (int)$m[1];
+            else foreach ($say as $k => $v) if (preg_match('/\b' . $k . '\b/', $n)) { $adet = $v; break; }
+            return self::araclaSor('en_borclu_musteriler', ['adet' => $adet], $kul);
+        }
+        if (preg_match('/gecen hafta|onceki hafta|haftaya gore|hafta.*(karsilastir|gore)/', $n)) {
+            $t = trim(preg_replace('/\b(gecen|onceki|haftaya|hafta|gore|satisi|satis|satislari|ne|durumda|nasil|karsilastir\w*|bu|son)\b/', ' ', $n));
+            $t = trim(implode(' ', array_filter(preg_split('/[^a-z0-9\-]+/', $t) ?: [])));
+            if ($t !== '') return self::araclaSor('satis_karsilastir', ['sorgu' => $t], $kul);
+        }
         if (str_contains($n, 'kritik')) return self::araclaSor('kritik_stok', [], $kul);
         if (preg_match('/gecik|vadesi gec|vadesi ger/', $n)) return self::araclaSor('geciken_faturalar', [], $kul);
         if (preg_match('/\b(bugun|ozet|ciro)\b|satis(lar)? (ne|kac)|aylik/', $n) && !preg_match('/sto[kg]/', $n)) return self::araclaSor('gunluk_ozet', [], $kul);

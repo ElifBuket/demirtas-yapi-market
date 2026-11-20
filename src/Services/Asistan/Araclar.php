@@ -27,6 +27,8 @@ final class Araclar
             ['name' => 'geciken_faturalar', 'description' => 'Vadesi geçmiş ve ödenmemiş faturaları, en çok gecikenden başlayarak listeler.', 'input_schema' => $bos, 'izin' => 'rapor.goruntule'],
             ['name' => 'siparis_sorgula', 'description' => 'Sipariş durumunu sipariş numarasıyla (S-2026-000001) veya cari koduyla sorgular.', 'input_schema' => $metin('Sipariş numarası veya cari kodu'), 'izin' => 'siparis.goruntule'],
             ['name' => 'gunluk_ozet', 'description' => 'Bugünkü ve aylık satış, toplam alacak, kritik stok ve onay bekleyen sipariş özeti.', 'input_schema' => $bos, 'izin' => 'rapor.goruntule'],
+            ['name' => 'en_borclu_musteriler', 'description' => 'Bakiyesi (bize borcu) en yüksek müşterileri sıralar. adet: 1-20 (varsayılan 5). Bakiye güncel durumdur, "bu ay" filtresi yoktur.', 'input_schema' => ['type' => 'object', 'properties' => ['adet' => ['type' => 'integer', 'description' => '1-20']]], 'izin' => 'rapor.goruntule'],
+            ['name' => 'satis_karsilastir', 'description' => 'Bir ürün (ad/kod parçası) için son 7 gün ile önceki 7 günün sevk (irsaliye) miktarını karşılaştırır.', 'input_schema' => $metin('Ürün adı parçası, örn. çimento'), 'izin' => 'rapor.goruntule'],
         ];
     }
 
@@ -81,6 +83,19 @@ final class Araclar
             case 'gunluk_ozet':
                 $o = Rapor::ozet($bugun);
                 return ['bugunku_satis' => $tl($o['gunluk_satis']), 'aylik_satis' => $tl($o['aylik_satis']), 'toplam_alacak_TL' => $tl($o['alacak']), 'tedarikciye_borc' => $tl($o['borc']), 'portfoy_cek' => $tl($o['portfoy_cek']), 'kritik_stok_urun' => $o['kritik_stok'], 'onay_bekleyen_siparis' => $o['onay_bekleyen']];
+            case 'en_borclu_musteriler':
+                $n = max(1, min(20, (int)($arg['adet'] ?? 5)));
+                return ['not' => 'Güncel bakiyeye göre sıralıdır (+ müşteri bize borçlu).', 'sonuc' => array_map(fn($x) => ['kod' => $x['kod'], 'musteri' => $x['unvan'], 'bakiye' => $tl(Hesap::kurus((string)$x['bakiye']))], Rapor::enBorclular($n))];
+            case 'satis_karsilastir':
+                if ($sorgu === '') return ['hata' => 'Ürün adı gerekli.'];
+                $b = new \DateTimeImmutable($bugun);
+                $s1 = $b->modify('-6 days')->format('Y-m-d'); $s0 = $b->modify('-13 days')->format('Y-m-d'); $e0 = $b->modify('-7 days')->format('Y-m-d');
+                $r = Db::all("SELECT u.stok_kodu, u.ad, u.temel_birim, COALESCE(SUM(CASE WHEN i.tarih BETWEEN ? AND ? THEN k.miktar END),0) AS bu, COALESCE(SUM(CASE WHEN i.tarih BETWEEN ? AND ? THEN k.miktar END),0) AS onceki FROM urunler u JOIN irsaliye_kalemleri k ON k.urun_id = u.id JOIN irsaliyeler i ON i.id = k.irsaliye_id WHERE (u.ad LIKE ? OR u.stok_kodu LIKE ?) AND i.tarih BETWEEN ? AND ? GROUP BY u.id, u.stok_kodu, u.ad, u.temel_birim ORDER BY bu DESC LIMIT " . self::LIMIT, [$s1, $bugun, $s0, $e0, $like, $like, $s0, $bugun]);
+                return ['not' => "Son 7 gün ($s1 – $bugun) ile önceki 7 gün ($s0 – $e0) sevk miktarı.", 'sonuc' => array_map(function ($x) {
+                    $bu = (float)$x['bu']; $on = (float)$x['onceki'];
+                    $d = $on > 0 ? sprintf('%+.1f%%', ($bu - $on) / $on * 100) : ($bu > 0 ? 'önceki hafta satış yok' : '—');
+                    return ['urun' => $x['stok_kodu'] . ' ' . $x['ad'], 'son_7_gun' => rtrim(rtrim(number_format($bu, 3, ',', '.'), '0'), ',') . ' ' . $x['temel_birim'], 'onceki_7_gun' => rtrim(rtrim(number_format($on, 3, ',', '.'), '0'), ',') . ' ' . $x['temel_birim'], 'degisim' => $d];
+                }, $r)];
         }
         return ['hata' => 'Bilinmeyen araç.'];
     }
