@@ -6,10 +6,13 @@
 - Proje şartlarının ve Excel verisinin incelenmesi, eksik/çelişkili bilgilerin listelenmesi, varsayımların önerilmesi.
 - PHP/MySQL kodunun yazılması: altyapı ve güvenlik, eski veri aktarımı, stok, sipariş→irsaliye→fatura→tahsilat, e-Fatura XML, yönetim paneli, cari yönetimi, asistan.
 - Otomatik testlerin yazılması ve çalıştırılması (hesap, stok, satış, rapor, e-Fatura, cari, asistan, HTTP güvenlik).
+- Mobil API ve Expo uygulamasının (çevrimdışı kuyruk, SDK 58 yükseltmesi, hosting bot korumasına uyum) yazılması; cihaz testi adayın telefonunda yapıldı.
+- Pazarlama çıktıları (analiz, kampanya kurguları, içerik takvimi, tasarımlar, demo videosu, broşür, tanıtım sitesi) ve sunum hazırlık notları.
+- Canlı yayın adımlarında (hosting seçimi, veritabanı aktarımı, dosya yapısı, hata ayıklama) adım adım yönlendirme; adımları aday kendi hesaplarında uyguladı.
 - README, kurulum yönergesi ve bu beyanın taslağı.
 
 ## Yapay zekânın yapmadığı / sınırları
-- Canlı sunucuya yayın, hosting hesabı, GitHub deposu, alan adı ve HTTPS adayın işidir.
+- Hosting hesabı, canlı sunucuya yükleme, GitHub deposu ve HTTPS ayarı adayın hesaplarında, adayın elleriyle yapıldı.
 - TCMB canlı bağlantısı, GİB resmî şema doğrulaması ve gerçek mali mühür/entegratör akışı yapay zekâ ortamında denenemedi (README'de belirtildi).
 - Karar gerektiren konularda (mükerrer cari bakiyeleri, EUR bakiyeler, %18 KDV vb.) yapay zekâ öneri sundu; kararlar README'deki "Varsayımlar" bölümünde adayın sorumluluğunda belgelenmiştir.
 
