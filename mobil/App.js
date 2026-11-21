@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, Alert, FlatList, Pressable, SafeAreaView, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { ActivityIndicator, Alert, FlatList, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import NetInfo from '@react-native-community/netinfo';
 import * as Crypto from 'expo-crypto';
@@ -108,6 +109,11 @@ function KuyrukEkrani({ kuyruk, gonder, gonderiyor, hataYeniden, temizle }) {
 }
 
 export default function App() {
+  return <SafeAreaProvider><Uygulama /></SafeAreaProvider>;
+}
+
+function Uygulama() {
+  const kenar = useSafeAreaInsets();
   const [hazir, setHazir] = useState(false); const [oturum, setOturum] = useState(null);
   const [onbellek, setOnbellek] = useState({ musteriler: [], urunler: [], zaman: null });
   const [kuyruk, setKuyruk] = useState([]); const [sekme, setSekme] = useState('yeni');
@@ -148,9 +154,9 @@ export default function App() {
   if (!hazir) return <View style={s.merkez}><ActivityIndicator /></View>;
   const bekleyen = Q.beklenenler(kuyruk).length;
   return (
-    <SafeAreaView style={s.kok}>
+    <View style={s.kok}>
       <StatusBar style="light" />
-      <View style={s.ust}>
+      <View style={[s.ust, { paddingTop: 14 + kenar.top }]}>
         <Text style={s.ustYazi}>Demirtaş Satış</Text>
         <Text style={[s.ustAlt, !cevrimici && { color: R.sari }]}>{oturum ? `${oturum.kullanici.ad_soyad} · ` : ''}{cevrimici ? 'Çevrimiçi' : 'ÇEVRİMDIŞI'}</Text>
       </View>
@@ -163,13 +169,13 @@ export default function App() {
               ? <YeniSiparis onbellek={onbellek} kuyrukEkle={kuyrukEkle} />
               : <KuyrukEkrani kuyruk={kuyruk} gonder={esitle} gonderiyor={gonderiyor} hataYeniden={(a) => guncelle(Q.hatayiYenidenKuyrugaAl(kuyruk, a)).then(esitle)} temizle={() => guncelle(Q.temizle(kuyruk))} />}
           </View>
-          <View style={s.sekmeler}>
+          <View style={[s.sekmeler, { paddingBottom: kenar.bottom }]}>
             <Pressable style={[s.sekme, sekme === 'yeni' && s.sekmeAktif]} onPress={() => setSekme('yeni')}><Text style={s.sekmeYazi}>Yeni sipariş</Text></Pressable>
             <Pressable style={[s.sekme, sekme === 'kuyruk' && s.sekmeAktif]} onPress={() => setSekme('kuyruk')}><Text style={s.sekmeYazi}>Kuyruk{bekleyen ? ` (${bekleyen})` : ''}</Text></Pressable>
             <Pressable style={s.sekme} onPress={() => Alert.alert('Çıkış', bekleyen ? `${bekleyen} gönderilmemiş sipariş cihazda kalır.` : 'Çıkış yapılsın mı?', [{ text: 'Vazgeç' }, { text: 'Çıkış', onPress: async () => { try { await Api.cikis(oturum.sunucu, oturum.token); } catch (e) { /* çevrimdışıysa yerel çıkış */ } oturumuKapat(); } }])}><Text style={s.sekmeYazi}>Çıkış</Text></Pressable>
           </View>
         </>)}
-    </SafeAreaView>
+    </View>
   );
 }
 
