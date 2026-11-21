@@ -45,3 +45,10 @@ PHP 8.3 seçin, MySQL veritabanı/kullanıcı oluşturun, `schema.sql`'i phpMyAd
 - [ ] Mobil uygulamada sunucu adresi `https://…` olarak girildi
 - [ ] Testler üretim DB'sinde ÇALIŞTIRILMAZ (yalnızca `*_test`)
 - [ ] Veri içe aktarma: `php import.php` (rapor: `rapor/`)
+
+## Seçenek C — InfinityFree (ücretsiz paylaşımlı hosting) — bu projede kullanılan
+Kısıtları README'de ("Canlı yayın" bölümü): tetikleyici yetkisi yok, tarayıcı dışı istemcilere bot koruması, dışa çıkış kısıtlı.
+1. Hesap panelinde MySQL veritabanı oluşturun (adı `if0_xxxxxxxx_demirtas` biçiminde olur) ve phpMyAdmin'de `schema.sql` (ya da hazır dump) dosyasını içe aktarın. Tetikleyiciler hata verirse atlayın.
+2. Dosya yapısı: `public/` içeriğini `htdocs/` köküne, `src/ views/ config/` klasörlerini `htdocs/app/` altına koyun; `public/index.php` içindeki `require dirname(__DIR__) . '/src/autoload.php'` satırını `require __DIR__ . '/app/src/autoload.php'` yapın; `htdocs/app/.htaccess` içine `Require all denied` yazın.
+3. `htdocs/app/.env` oluşturun (`DB_HOST=sqlXXX.infinityfree.com`, `DB_NAME`, `DB_USER`, `DB_PASS`, `APP_ENV=production`).
+4. Kullanıcı parolaları yerelde üretilip hash olarak içe aktarılır (hostingte komut satırı yoktur).

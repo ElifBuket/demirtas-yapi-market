@@ -91,4 +91,13 @@ PHP 8.2+ (framework yok), MySQL/MariaDB. Web arayüzü sunucuda çizilir; mobil 
 **Uygulama (`mobil/`)**: giriş (sunucu adresi ayarlanabilir), müşteri arama, ürün arama, sipariş, **çevrimdışı kuyruk** (AsyncStorage), bağlantı gelince otomatik gönderim (NetInfo), kuyruk ekranı (bekliyor/gönderildi/hata, yeniden dene). Kuyruk mantığı `src/queue.js` içinde saf fonksiyonlardır: `cd mobil && node --test test/queue.test.mjs` (12 test).
 - Çalıştırma: `cd mobil && npm install && npx expo start` → telefonda Expo Go ile QR okut.
 - APK: `npm i -g eas-cli && eas login && eas build -p android --profile apk` (Expo hesabı gerekir, ücretsiz katman yeterli) veya Android Studio ile `npx expo prebuild && cd android && ./gradlew assembleRelease`.
-- **Dürüst sınır**: Uygulama bu ortamda bir telefonda/emülatörde çalıştırılmadı ve APK burada derlenemedi; kod sözdizimi ve kuyruk mantığı test edildi, ekranlar cihazda ilk kez sizin makinenizde denenecek. HTTP (cleartext) yalnızca yerel deneme içindir; yayında HTTPS kullanın.
+- **Gerçek durum (21.11.2026)**: Uygulama iPhone'da Expo Go (SDK 58) ile **gerçek cihazda ve canlı sunucuda** denendi: giriş, 67 müşteri listesi (satışçıya ait), sipariş gönderme, **uçak modunda kuyruğa alma**, bağlantı gelince otomatik gönderim; web panelinde sipariş **tek kopya** göründü. APK Expo'nun bulut derleyicisiyle (EAS) üretildi; **APK bir Android cihazda denenmedi** (elimde Android cihaz yok). HTTP (cleartext) yalnızca yerel deneme içindir; canlıda HTTPS kullanılır.
+- **Ücretsiz hosting bot koruması**: InfinityFree, tarayıcı olmayan istemcilere önce küçük bir JavaScript sınavı (`toNumbers(...)` → AES → `__test` çerezi) döndürür. Uygulama bu sınavı çözüp isteği tekrarlar (`mobil/src/botkoruma.js`). Postman/curl gibi istemcilerle bu hostingte API denemesi aynı nedenle çalışmayabilir; kendi sunucunuzda (VPS/XAMPP) böyle bir koruma yoktur.
+
+## Canlı yayın (InfinityFree, ücretsiz) — ne yapıldı, ne kısıtlı
+- Adres: `https://demirtasyapi.rf.gd` (HTTPS çalışıyor). PHP 8.4, MariaDB; dosya yapısı: `htdocs/` = `public/` içeriği, kaynak kod `htdocs/app/` (içine `.htaccess` ile dışarıdan erişim kapalı), `.env` `htdocs/app/.env`.
+- Veritabanı phpMyAdmin ile içe aktarıldı (şema + eski kayıt aktarımı + demo kullanıcılar).
+- **Kısıt 1 — tetikleyici yetkisi yok**: ücretsiz hesap `TRIGGER` yetkisi vermiyor (`#1142`). `islem_kaydi` tablosunun UPDATE/DELETE'e karşı veritabanı seviyesindeki koruması canlıda **kurulamadı**. Uygulama bu tabloya yalnızca INSERT yapar; yerel kurulumda ve VPS'te `schema.sql` tetikleyicileri çalışır.
+- **Kısıt 2 — bot koruması** (yukarıda).
+- **Kısıt 3 — dışa çıkış**: TCMB kur çekimi ve (varsa) Anthropic API çağrısı canlıda denenmedi; ücretsiz hostinglerde dışa istekler çoğunlukla kapalıdır. Kur "elle gir" ekranından girilebilir.
+- Şifre algoritması: kod `argon2id` kullanır, yoksa bcrypt'e düşer (`Auth::hashPassword`); canlıda demo kullanıcıların parolaları bcrypt ile yazıldı.
