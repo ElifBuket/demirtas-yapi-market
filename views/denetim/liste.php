@@ -9,7 +9,16 @@
   </select>
   <button class="ana-dugme kucuk" type="submit">Filtrele</button>
 </form>
-<p class="sonuc-ozet">Son 200 kayıt gösteriliyor.</p>
+<p class="sonuc-ozet" id="zincir-durum">
+  <?php if ($zincir['durum'] === 'tamam'): ?>
+    <span class="rozet">Zincir doğrulandı</span> <?= e($zincir['mesaj']) ?> Kayıtlar sonradan değiştirilmemiş.
+  <?php elseif ($zincir['durum'] === 'bozuk'): ?>
+    <span class="rozet engelli">Zincir bozuk</span> <?= e($zincir['mesaj']) ?>
+  <?php else: ?>
+    <span class="rozet">Zincir yok</span> <?= e($zincir['mesaj']) ?>
+  <?php endif; ?>
+  Son 200 kayıt gösteriliyor.
+</p>
 <?php if (!$satirlar): ?>
   <p class="bos-durum">Henüz kayıt yok. Giriş, çıkış ve veri değişiklikleri burada görünür.</p>
 <?php else: ?>

@@ -9,4 +9,7 @@ spl_autoload_register(function (string $class): void {
     if (is_file($file)) require $file;
 });
 
+// Tüm tarih/saatler Türkiye saatiyle (UTC+03:00) üretilir; veritabanı oturumu da aynı dilime çekilir (bkz. Db::pdo).
+date_default_timezone_set(\App\Core\Config::env('APP_TZ', 'Europe/Istanbul'));
+
 require_once __DIR__ . '/helpers.php';

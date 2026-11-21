@@ -24,7 +24,8 @@ PHP 8.2+ (framework yok), MySQL/MariaDB. Web arayüzü sunucuda çizilir; mobil 
 - Stok değeri doğrudan güncellenmez; her değişiklik `stok_hareketleri` kaydıdır. Cari bakiye `cari_hareketler` toplamıdır.
 - Yetki: rol → yetki tablosu `src/Core/Roles.php`; kontrol her istekte sunucuda (`Router`/`Auth::require`). Menüde gizleme yalnızca görünümdür.
 - Güvenlik: argon2id parola özeti, hazırlanmış sorgular (emülasyon kapalı), çıktıda `e()` ile kaçırma + CSP, tüm POST'larda CSRF jetonu + Origin denetimi, HttpOnly/SameSite çerez, oturum kimliği yenileme, 5 hatalı denemede 15 dk engel.
-- İşlem kaydı (`islem_kaydi`) yalnızca eklenir; tetikleyiciler UPDATE/DELETE'i engeller.
+- İşlem kaydı (`islem_kaydi`) yalnızca eklenir; tetikleyiciler UPDATE/DELETE'i engeller. Ayrıca kayıtlar bir **hash zinciriyle** bağlıdır (her satırın SHA-256 özeti bir öncekini kapsar, `src/Core/Audit.php`); bir kayıt değiştirilir ya da silinirse Denetim sayfasında "Zincir bozuk" uyarısı çıkar. Test: `tests/denetim_zincir_test.php`.
+- Tüm tarih/saatler Türkiye saatiyle (UTC+03:00) üretilir: `src/autoload.php` PHP saat dilimini, `Db::saatDilimi()` veritabanı oturumunu buna ayarlar (`APP_TZ` ile değiştirilebilir). Bu değişiklikten önceki işlem kayıtları sunucunun eski saat diliminde (UTC−8) saklıdır.
 
 ## Varsayımlar ve kararlar (müşteri yanıt vermedi; sorulan sorular için kendi kararımız)
 - Aynı VKN + tipte mükerrer carilerde kodlu kayıt esas alındı, diğeri aktarılmadı, bakiyeler toplanmadı (atlanan 17 kaydın bakiyesi sisteme yansımadı: ayrıntı aktarım raporunda).
@@ -97,7 +98,7 @@ PHP 8.2+ (framework yok), MySQL/MariaDB. Web arayüzü sunucuda çizilir; mobil 
 ## Canlı yayın (InfinityFree, ücretsiz) — ne yapıldı, ne kısıtlı
 - Adres: `https://demirtasyapi.rf.gd` (HTTPS çalışıyor). PHP 8.4, MariaDB; dosya yapısı: `htdocs/` = `public/` içeriği, kaynak kod `htdocs/app/` (içine `.htaccess` ile dışarıdan erişim kapalı), `.env` `htdocs/app/.env`.
 - Veritabanı phpMyAdmin ile içe aktarıldı (şema + eski kayıt aktarımı + demo kullanıcılar).
-- **Kısıt 1 — tetikleyici yetkisi yok**: ücretsiz hesap `TRIGGER` yetkisi vermiyor (`#1142`). `islem_kaydi` tablosunun UPDATE/DELETE'e karşı veritabanı seviyesindeki koruması canlıda **kurulamadı**. Uygulama bu tabloya yalnızca INSERT yapar; yerel kurulumda ve VPS'te `schema.sql` tetikleyicileri çalışır.
+- **Kısıt 1 — tetikleyici yetkisi yok**: ücretsiz hesap `TRIGGER` yetkisi vermiyor (`#1142`). `islem_kaydi` tablosunun UPDATE/DELETE'e karşı veritabanı seviyesindeki koruması canlıda **kurulamadı**. Uygulama bu tabloya yalnızca INSERT yapar; yerel kurulumda ve VPS'te `schema.sql` tetikleyicileri çalışır. Canlıda değişmezlik tetikleyici yerine **hash zinciriyle** sağlanır: engellemez, ama kurcalamayı Denetim sayfasında görünür kılar (silinen *son* kayıtlar zincirle yakalanamaz; bu bilinen bir sınırdır).
 - **Kısıt 2 — bot koruması** (yukarıda).
 - **Kısıt 3 — dışa çıkış**: TCMB kur çekimi ve (varsa) Anthropic API çağrısı canlıda denenmedi; ücretsiz hostinglerde dışa istekler çoğunlukla kapalıdır. Kur "elle gir" ekranından girilebilir.
 - Şifre algoritması: kod `argon2id` kullanır, yoksa bcrypt'e düşer (`Auth::hashPassword`); canlıda demo kullanıcıların parolaları bcrypt ile yazıldı.

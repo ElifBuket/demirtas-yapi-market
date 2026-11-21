@@ -165,6 +165,8 @@ CREATE TABLE IF NOT EXISTS islem_kaydi (
   eski_deger JSON NULL,
   yeni_deger JSON NULL,
   aciklama VARCHAR(255) NULL,
+  onceki_hash CHAR(64) NULL,                    -- hash zinciri: bir önceki kaydın hash'i ('' = zincirin ilk kaydı)
+  hash CHAR(64) NULL,                           -- SHA-256(önceki hash + bu kaydın alanları); bkz. src/Core/Audit.php
   KEY (zaman), KEY (kullanici_id), KEY (eylem), KEY (tablo, kayit_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

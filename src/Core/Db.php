@@ -13,11 +13,23 @@ final class Db
 
     public static function pdo(): \PDO
     {
-        return self::$pdo ??= new \PDO(Config::dsn(), Config::dbUser(), Config::dbPass(), [
-            \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
-            \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC,
-            \PDO::ATTR_EMULATE_PREPARES => false,
-        ]);
+        if (self::$pdo === null) {
+            $pdo = new \PDO(Config::dsn(), Config::dbUser(), Config::dbPass(), [
+                \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
+                \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC,
+                \PDO::ATTR_EMULATE_PREPARES => false,
+            ]);
+            self::saatDilimi($pdo);
+            self::$pdo = $pdo;
+        }
+        return self::$pdo;
+    }
+
+    /** Veritabanı oturumunun saat dilimini PHP ile aynı yapar; NOW() ve kayıt saatleri PHP tarihleriyle tutarlı olur. */
+    private static function saatDilimi(\PDO $pdo): void
+    {
+        $fark = (new \DateTimeImmutable('now'))->format('P'); // ör. +03:00
+        $pdo->exec("SET time_zone = '$fark'");
     }
 
     /**
@@ -32,6 +44,7 @@ final class Db
         $ro = new \PDO(Config::dsn(), $kullanici, $parola, [
             \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION, \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC, \PDO::ATTR_EMULATE_PREPARES => false,
         ]);
+        self::saatDilimi($ro);
         $ro->exec('SET SESSION TRANSACTION READ ONLY');
         $eski = self::$pdo;
         self::$pdo = $ro;

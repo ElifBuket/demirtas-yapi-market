@@ -18,7 +18,7 @@
 7. **36. saat durum e-postası ZORUNLU** (rapor göndermeyen aday değerlendirilmez).
 
 ## Denenmeyenler
-TCMB canlı kur, gerçek Anthropic çağrısı, GİB şema doğrulaması, APK'nın Android cihazda çalışması. Canlıda veritabanı tetikleyicileri kurulamadı (ücretsiz hosting yetkisi yok).
+TCMB canlı kur, gerçek Anthropic çağrısı, GİB şema doğrulaması, APK'nın Android cihazda çalışması. Canlıda veritabanı tetikleyicileri kurulamadı (ücretsiz hosting yetkisi yok); işlem kaydının değişmezliği bunun yerine hash zinciriyle sağlanır (`Audit::dogrula()`, Denetim sayfasında gösterge).
 
 ## Bilinen eksikler
 17 mükerrer cari bakiyesi alınmadı (251.644,60 ₺); tedarikçi eşleşmesi 233/498; fatura iptali/iade yok; nakit akışında ödemeler yok; marka/alan adı "Harç" araması yapılmadı; pazarlama rakamları varsayım.

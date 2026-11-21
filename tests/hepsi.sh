@@ -15,3 +15,4 @@ php tests/rapor_test.php | tail -1
 php tests/efatura_test.php | tail -1
 php tests/cari_test.php | tail -1
 php tests/asistan_test.php | tail -1
+php tests/denetim_zincir_test.php | tail -1
