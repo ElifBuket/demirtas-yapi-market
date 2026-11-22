@@ -114,6 +114,18 @@ Satis::siparisOnayla($asr['id'], $patron);
 esit('patron onayladı', Db::value('SELECT durum FROM siparisler WHERE id = ?', [$asr['id']]), 'onayli');
 hata('onaylı siparisi tekrar onayla', fn() => Satis::siparisOnayla($asr['id'], $patron), 'beklemiyor');
 Satis::irsaliyeKes($asr['id'], [$kr => 1000], $bugun, k(), $patron);
+// Onay bekleyen sipariş de risk hesabına girer (limit kağıt üzerinde kalmasın)
+$cp = cari('CP', ['limit' => '1000.00']);
+$p1 = Satis::siparisOlustur($cp, 1, $bugun, [sat($A, 4000, 4000000)], 0, k(), $patron); // 4 × 480 = 1920 > 1000
+esit('büyük sipariş limiti aşar → onay bekliyor', $p1['durum'], 'onay_bekliyor');
+$p2 = Satis::siparisOlustur($cp, 1, $bugun, [sat($A, 1000, 4000000)], 0, k(), $patron); // tek başına 480 < 1000 ama bekleyen 1920 sayılır
+esit('onay bekleyen sipariş varken yeni sipariş de onaya düşer', $p2['durum'], 'onay_bekliyor');
+esit('risk notu bekleyeni de içerir', str_contains((string)$p2['risk_notu'], '2.400,00'), true);
+Satis::siparisIptal($p1['id'], $patron);
+$p3 = Satis::siparisOlustur($cp, 1, $bugun, [sat($A, 1000, 4000000)], 0, k(), $patron); // bekleyen 480 + yeni 480 = 960 ≤ 1000
+esit('bekleyen büyük sipariş iptal edilince limit yeniden serbest', $p3['durum'], 'onayli');
+Satis::siparisOnayla($p2['id'], $patron); // onaylanan sipariş bir kez sayılır, ikinci kez değil
+esit('onaylanan bekleyen sipariş tek sayılır (480 + 480 TL)', Satis::acikSiparis($cp), 96000);
 $cn = cari('CN'); // limit tanımsız
 esit('limit tanımsız → onay', Satis::siparisOlustur($cn, 1, $bugun, [sat($A, 1000, 100000)], 0, k(), $patron)['durum'], 'onay_bekliyor');
 $sIpt = Satis::siparisOlustur($cn, 1, $bugun, [sat($A, 1000, 100000)], 0, k(), $patron);
@@ -165,6 +177,25 @@ $tc2 = Satis::tahsilatGir($cc, 11000, 'cek', $bugun, '2026-09-01', 'CK-2', null,
 Satis::cekTahsilEdildi($tc2['id'], $patron);
 esit('çek tahsil edildi', Db::value('SELECT durum FROM tahsilatlar WHERE id = ?', [$tc2['id']]), 'tahsil_edildi');
 hata('tahsil edilmiş çek karşılıksız yapılamaz', fn() => Satis::cekKarsiliksiz($tc2['id'], '2026-09-02', $patron), 'portföydeki');
+
+// ===== Senaryo: kısmi tahsilat → fazla ödeme (avans) → karşılıksız çek =====
+$cz = cari('SNR', ['limitsiz' => 1]);
+$sz = Satis::siparisOlustur($cz, 1, $bugun, [sat($A, 1000, 100000000)], 0, k(), $patron); // 10.000 TL + %20 KDV
+$kz = (int)Db::value('SELECT id FROM siparis_kalemleri WHERE siparis_id = ?', [$sz['id']]);
+$iz = Satis::irsaliyeKes($sz['id'], [$kz => 1000], $bugun, k(), $patron);
+$fz = Satis::faturaKes([$iz['id']], 15, $bugun, k(), $patron);
+esit('fatura 12.000,00 (10.000 + %20)', $fz['toplam'], 1200000);
+esit('fatura kesilince bakiye 12.000', Satis::bakiye($cz), 1200000);
+Satis::tahsilatGir($cz, 400000, 'nakit', $bugun, null, null, null, k(), $patron);
+esit('4.000 tahsilat → fatura kalanı 8.000', Satis::faturaKalan($fz['id']), 800000);
+esit('4.000 tahsilat → bakiye 8.000', Satis::bakiye($cz), 800000);
+$tcz = Satis::tahsilatGir($cz, 900000, 'cek', $bugun, '2026-12-01', 'CK-S', null, k(), $patron); // 8.000 kalan + 1.000 fazla
+esit('9.000 çek → fatura kapandı', Satis::faturaKalan($fz['id']), 0);
+esit('9.000 çek → 1.000 avans', $tcz['avans'], 100000);
+esit('9.000 çek → bakiye -1.000', Satis::bakiye($cz), -100000);
+Satis::cekKarsiliksiz($tcz['id'], '2026-12-02', $patron);
+esit('karşılıksız → cari bakiye 8.000 (4.000 nakit düşülmüş hâli)', Satis::bakiye($cz), 800000);
+esit('karşılıksız → fatura kalanı 8.000, bakiyeyle tutarlı', Satis::faturaKalan($fz['id']), 800000);
 
 // ===== Genel tutarlılık: bakiye = Σfatura − Σtahsilat(+karşılıksız) her cari için =====
 $kotu = 0;

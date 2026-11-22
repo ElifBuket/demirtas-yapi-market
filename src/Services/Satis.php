@@ -58,10 +58,10 @@ final class Satis
         return Hesap::kurus((string)Db::value('SELECT COALESCE(SUM(borc) - SUM(alacak), 0) FROM cari_hareketler WHERE cari_id = ?', [$cariId]));
     }
 
-    /** Faturalanmamış açık sipariş tutarı (kuruş). İptal ve onay bekleyenler hariç. */
+    /** Faturalanmamış açık sipariş tutarı (kuruş). İptal edilenler hariç; onay bekleyenler DAHİL: bekleyen büyük bir siparişin yanından küçük siparişler limiti delip geçmesin. */
     public static function acikSiparis(int $cariId): int
     {
-        return Hesap::kurus((string)Db::value("SELECT COALESCE(SUM(toplam - faturalanan_toplam), 0) FROM siparisler WHERE cari_id = ? AND durum IN ('onayli','kismi_sevk','sevk_edildi')", [$cariId]));
+        return Hesap::kurus((string)Db::value("SELECT COALESCE(SUM(toplam - faturalanan_toplam), 0) FROM siparisler WHERE cari_id = ? AND durum IN ('onay_bekliyor','onayli','kismi_sevk','sevk_edildi')", [$cariId]));
     }
 
     // ---------- 1. Sipariş ----------
