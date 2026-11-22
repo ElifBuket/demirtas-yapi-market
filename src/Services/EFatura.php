@@ -163,7 +163,8 @@ final class EFatura
         $root->setAttributeNS(self::NS['xsi'], 'xsi:schemaLocation', 'urn:oasis:names:specification:ubl:schema:xsd:Invoice-2 UBL-Invoice-2.1.xsd');
         $this->d->appendChild($root);
 
-        $this->ekle($root, $this->ekle($this->el('ext:UBLExtensions'), $this->ekle($this->el('ext:UBLExtension'), $this->el('ext:ExtensionContent'))));
+        // Mali mühür/imza yeri: GİB örneklerindeki gibi bir yer tutucu (imza entegratör/imzalama aracı tarafından bu elemanın yerine konur).
+        $this->ekle($root, $this->ekle($this->el('ext:UBLExtensions'), $this->ekle($this->el('ext:UBLExtension'), $this->ekle($this->el('ext:ExtensionContent'), $this->d->createElementNS('urn:harc:imza-yeri', 'harc:imza-yeri')))));
         $this->ekle($root,
             $this->el('cbc:UBLVersionID', '2.1'), $this->el('cbc:CustomizationID', 'TR1.2'), $this->el('cbc:ProfileID', 'TICARIFATURA'),
             $this->el('cbc:ID', self::gibNo($f['belge_no'])), $this->el('cbc:CopyIndicator', 'false'), $this->el('cbc:UUID', $f['ettn']),

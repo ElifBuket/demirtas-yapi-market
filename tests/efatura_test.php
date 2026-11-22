@@ -54,6 +54,15 @@ $fid = fat($ok, [
 esit('eksik yok', EFatura::eksikler($fid), []);
 $xml = EFatura::uret($fid);
 $d = new DOMDocument(); esit('XML iyi biçimli', $d->loadXML($xml), true);
+// İsteğe bağlı: GİB'in resmi UBL-TR 1.2.1 paketindeki XSD'ye karşı doğrulama (EFATURA_XSD=…/xsdrt/maindoc/UBL-Invoice-2.1.xsd).
+if (($xsd = Config::env('EFATURA_XSD', '')) !== '' && is_file($xsd)) {
+    libxml_use_internal_errors(true);
+    $gecerli = $d->schemaValidate($xsd);
+    if (!$gecerli) foreach (libxml_get_errors() as $e) fwrite(STDERR, 'XSD: ' . trim($e->message) . "\n");
+    libxml_clear_errors();
+    esit('GİB UBL-TR 1.2.1 XSD ile geçerli', $gecerli, true);
+}
+if (($dump = Config::env('EFATURA_DUMP', '')) !== '') file_put_contents($dump, $xml);
 $x = new DOMXPath($d);
 foreach (['inv' => 'urn:oasis:names:specification:ubl:schema:xsd:Invoice-2', 'cac' => 'urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2', 'cbc' => 'urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2'] as $p => $u) $x->registerNamespace($p, $u);
 $v = fn(string $q) => trim((string)$x->evaluate("string($q)"));
