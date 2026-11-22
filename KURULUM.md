@@ -6,14 +6,14 @@
 | **XAMPP** (PHP 8.2 veya 8.3 sürümü) – apachefriends.org | PHP + MySQL (MariaDB) | Kurulumda yalnızca **Apache** ve **MySQL** yeter |
 | **Visual Studio Code** – code.visualstudio.com | Kodu okumak/düzenlemek | |
 | **Git** – git-scm.com | GitHub'a yüklemek | |
-| **Node.js LTS** – nodejs.org | Mobil uygulama (sonraki aşama) | Şimdilik gerekmez, mobil aşamasında kurarız |
-| **Expo Go** (telefona, mağazadan) | Mobil uygulamayı denemek | Mobil aşamasında |
+| **Node.js LTS** – nodejs.org | Mobil uygulama (`mobil/` klasörü) | Yalnızca mobil uygulamayı geliştirmek veya test etmek için gerekir |
+| **Expo Go** (telefona, mağazadan) | Mobil uygulamayı denemek | İsteğe bağlı |
 | Tarayıcı (Chrome) | Denemek | |
 
 Hesaplar: **GitHub** (ücretsiz), bir **hosting** hesabı (canlı adres için; PHP+MySQL destekleyen, ücretsiz deneme sunan biri).
 
 ## 2. Projeyi yerleştir
-1. `demirtas-proje.zip` dosyasını `C:\demirtas` klasörüne çıkar (içinde `schema.sql`, `public`, `src` görünmeli).
+1. Depoyu `git clone` ile ya da zip olarak indirip `C:\demirtas` klasörüne yerleştir (içinde `schema.sql`, `public`, `src` görünmeli).
 2. XAMPP Control Panel'i aç, **Apache** ve **MySQL** için *Start*'a bas.
 3. `C:\xampp\php\php.ini` dosyasında şu satırların başında `;` olmasın: `extension=zip`, `extension=mbstring`, `extension=pdo_mysql`, `extension=intl` (varsa). Değiştirdiysen Apache'yi yeniden başlat.
 4. PowerShell aç: `$env:Path += ";C:\xampp\php"` (bu pencere için `php` komutunu tanıtır).
@@ -38,5 +38,5 @@ Tarayıcı: `http://127.0.0.1:8081` → patron / muhasebe / depo / satisci ile g
 ## 5. Testler (isteğe bağlı ama sunumda göstermek iyi olur)
 ```
 $env:DB_USER="root"
-sh tests/hepsi.sh      # Git ile gelen "Git Bash" içinde çalıştır
+tests\hepsi.bat        # PowerShell'de (Git Bash kullanıyorsan: sh tests/hepsi.sh)
 ```
