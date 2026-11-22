@@ -5,9 +5,9 @@ Adım adım Windows kurulumu: `KURULUM.md`.
 PHP 8.2+ (framework yok), MySQL/MariaDB. Web arayüzü sunucuda çizilir; mobil uygulama `mobil/` klasöründedir (React Native / Expo).
 
 ## Bu proje nasıl geliştirildi? (yapay zekâ kullanımı)
-Bu projeyi Bilgisayar Mühendisliği'nden yeni mezun olarak ben (Elif Buket Duman) hazırladım; geliştirmeyi **Claude (Anthropic) ile birlikte**, 72 saat boyunca adım adım ilerleyerek yaptık. İşin araştırmasını, ürün ve tasarım fikirlerini ben belirledim; başka siteleri ve benzer sistemleri kendim inceledim. Kodu birlikte geliştirdik: Claude kodun büyük bölümünü yazdı, ben ne istediğimizi söyledim, çıkanları değerlendirdim, kendi bilgisayarımda, iPhone ve Android telefonlarda ve canlı sunucuda çalıştırıp denedim, bulduğum hataları ve eksikleri geri bildirdim, düzeltmeleri birlikte yaptık. Hosting kurulumu, veritabanı aktarımı, dosya yüklemeleri, GitHub ve testlerin çalıştırılması benim hesaplarımda, benim elimle yapıldı.
+Bu projeyi Bilgisayar Mühendisliği'nden yeni mezun olarak ben (Elif Buket Duman) hazırladım; geliştirmeyi **Claude ile birlikte**, 72 saat boyunca adım adım ilerleyerek yaptık. İşin araştırmasını, ürün ve tasarım fikirlerini ben belirledim; başka siteleri ve benzer sistemleri kendim inceledim. Kodu birlikte geliştirdik: Claude kodun bölümünü yazdı, ben ne istediğimizi söyledim, çıkanları değerlendirdim, kendi bilgisayarımda, iPhone ve Android telefonlarda ve canlı sunucuda çalıştırıp denedim, bulduğum hataları ve eksikleri geri bildirdim, düzeltmeleri birlikte yaptık. Hosting kurulumu, veritabanı aktarımı, dosya yüklemeleri, GitHub ve testlerin çalıştırılması benim hesaplarımda, benim elimle yapıldı.
 
-Modüller arası bağlantıları ve otomatik testleri bu süreçte Claude ile öğrendim ve öğrenmeye devam ediyorum. Son iş kuralı değişikliğinde (onay bekleyen siparişlerin risk limitine dahil edilmesi) eksiği ben fark ettim, birlikte düzelttik, canlıda denedim.
+Son iş kuralı değişikliğinde (onay bekleyen siparişlerin risk limitine dahil edilmesi) eksiği ben fark ettim, birlikte düzelttik, canlıda denedim.
 
 Tüm ayrıntı: [`docs/YAPAY_ZEKA_BEYANI.md`](docs/YAPAY_ZEKA_BEYANI.md).
 
