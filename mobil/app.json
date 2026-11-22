@@ -5,7 +5,16 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "light",
-    "android": { "package": "com.voqa.demirtas.satis", "versionCode": 1, "usesCleartextTraffic": true },
-    "plugins": []
+    "android": {
+      "package": "com.voqa.demirtas.satis",
+      "versionCode": 1,
+      "usesCleartextTraffic": true
+    },
+    "plugins": [],
+    "extra": {
+      "eas": {
+        "projectId": "f9e73cc7-25f1-484b-8130-3e59c7e009a5"
+      }
+    }
   }
 }
